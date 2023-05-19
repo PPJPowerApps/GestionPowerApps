@@ -91,6 +91,7 @@
   <ItemGroup>
     <Compile Include="AsignacionEjecutivo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReasignarEjecutivo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="alfredoleonellim.snk" />
