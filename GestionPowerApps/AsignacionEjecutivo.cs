@@ -21,51 +21,45 @@ namespace GestionPowerApps
             ITracingService tracingService =
                 (ITracingService)serviceProvider.GetService(typeof(ITracingService));
 
-            try
+            //Verificación context vacio
+            if (context.InputParameters.Contains("Target") && context.InputParameters["Target"] is Entity)
             {
-                //Obtención de información flujo
-                Entity prospecto = (Entity)context.InputParameters["Target"];
-                EntityReference producto = (EntityReference)prospecto.Attributes["crbe4_productoaofrecer"];
-
-                //Query para obtener información de Configurador de Producto
-                QueryExpression queryConfiguradorEjecutivo = new QueryExpression
+                try
                 {
-                    EntityName = "crbe4_configuradordeproducto",
-                    ColumnSet = new ColumnSet("crbe4_ejecutivo", "crbe4_contador")
-                };
-                
-                //Filtro para obtener ejecutivos asignados a producto ingresado en flujo
-                queryConfiguradorEjecutivo.Criteria.AddCondition("crbe4_productoaofrecer", ConditionOperator.Equal, producto.Id);
-                EntityCollection listaConfiguradorEjecutivos = orgService.RetrieveMultiple(queryConfiguradorEjecutivo);
+                    //Obtención de información flujo
+                    Entity prospecto = (Entity)context.InputParameters["Target"];
+                    EntityReference producto = (EntityReference)prospecto.Attributes["crbe4_productoaofrecer"];
 
-                //Lógica para seleccionar ejecutivo con menor contador
-                int contadorMinimo = int.MaxValue;
-                Entity configuradorEjecutivoMenor = null;
-                foreach (Entity auxEjecutivo in listaConfiguradorEjecutivos.Entities)
-                {
-                    int contador = int.Parse(auxEjecutivo.Attributes["crbe4_contador"].ToString());
-
-                    if (contador < contadorMinimo)
+                    //Query para obtener información de Configurador de Producto
+                    QueryExpression queryConfiguradorEjecutivo = new QueryExpression
                     {
-                        contadorMinimo = contador;
-                        configuradorEjecutivoMenor = auxEjecutivo;
-                    }
+                        EntityName = "crbe4_configuradordeproducto",
+                        ColumnSet = new ColumnSet("crbe4_ejecutivo", "crbe4_contador")
+                    };
+                
+                    //Filtro para obtener ejecutivos asignados a producto ingresado en flujo
+                    queryConfiguradorEjecutivo.Criteria.AddCondition("crbe4_productoaofrecer", ConditionOperator.Equal, producto.Id);
+                    queryConfiguradorEjecutivo.AddOrder("crbe4_contador", OrderType.Ascending);
+                    EntityCollection listaConfiguradorEjecutivos = orgService.RetrieveMultiple(queryConfiguradorEjecutivo);
+                    Entity configuradorEjecutivoMenor = listaConfiguradorEjecutivos.Entities[0];
+
+                    //Suma a contador de ejecutivo seleccionado
+                    configuradorEjecutivoMenor.Attributes["crbe4_contador"] = int.Parse(configuradorEjecutivoMenor.Attributes["crbe4_contador"].ToString()) + 1;
+                    orgService.Update(configuradorEjecutivoMenor);
+
+                    //Asignación de ejecutivo a prospecto
+                    EntityReference ejecutivo = (EntityReference)configuradorEjecutivoMenor["crbe4_ejecutivo"];
+                    Entity auxProspecto = new Entity("crbe4_prospecto");
+                    auxProspecto.Id = prospecto.Id;
+                    auxProspecto.Attributes["crbe4_ejecutivo"] = ejecutivo;
+                    auxProspecto.Attributes["crbe4_contador"] = 0;
+                    orgService.Update(auxProspecto);
                 }
-
-                //Suma a contador de ejecutivo seleccionado
-                configuradorEjecutivoMenor.Attributes["crbe4_contador"] = int.Parse(configuradorEjecutivoMenor.Attributes["crbe4_contador"].ToString()) + 1;
-                orgService.Update(configuradorEjecutivoMenor);
-
-                //Asignación de ejecutivo a prospecto
-                EntityReference ejecutivo = (EntityReference)configuradorEjecutivoMenor["crbe4_ejecutivo"];
-                prospecto.Attributes["crbe4_ejecutivo"] = ejecutivo;
-                orgService.Update(prospecto);
-
-            }
-            catch (Exception ex)
-            {
-                tracingService.Trace("Error de plugin: {0}", ex.ToString());
-                throw;
+                catch (Exception ex)
+                {
+                    tracingService.Trace("Error de plugin: {0}", ex.ToString());
+                    throw;
+                }
             }
         }
     }
