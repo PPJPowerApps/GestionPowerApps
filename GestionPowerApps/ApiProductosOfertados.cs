@@ -25,12 +25,9 @@ namespace GestionPowerApps
             ITracingService tracingService =
                 (ITracingService)serviceProvider.GetService(typeof(ITracingService));
 
-            Guid prospecto = (Guid)context.InputParameters["prospecto"];
-            Guid producto = (Guid)context.InputParameters["producto"];
+            Guid prospecto = (Guid)context.InputParameters["crbe4_prospecto"];
+            Guid producto = (Guid)context.InputParameters["crbe4_productoaofrecer"];
             bool ofertado = true;
-
-            tracingService.Trace(prospecto.ToString());
-            tracingService.Trace(producto.ToString());
 
             QueryExpression queryProductosOfertados = new QueryExpression
             {
