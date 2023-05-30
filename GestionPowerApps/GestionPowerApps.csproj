@@ -89,6 +89,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApiProductosOfertados.cs" />
     <Compile Include="AsignacionEjecutivo.cs" />
     <Compile Include="ReasignarEjecutivo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

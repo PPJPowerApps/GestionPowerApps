@@ -34,15 +34,11 @@ namespace GestionPowerApps
                     Entity prospectoNuevo = (Entity)context.InputParameters["Target"];
                     EntityReference productoNuevo = (EntityReference)prospectoNuevo.Attributes["crbe4_productoaofrecer"];
 
-                    tracingService.Trace(productoNuevo.Id.ToString());
-
                     //Obtención de información antigua de prospecto
                     ColumnSet csProspectoAntiguo = new ColumnSet("crbe4_productoaofrecer", "crbe4_ejecutivo");
                     Entity prospectoAntiguo = orgService.Retrieve("crbe4_prospecto", prospectoNuevo.Id, csProspectoAntiguo);
                     EntityReference productoAntiguo = (EntityReference)prospectoAntiguo.Attributes["crbe4_productoaofrecer"];
                     EntityReference ejecutivoAntiguo = (EntityReference)prospectoAntiguo.Attributes["crbe4_ejecutivo"];
-
-                    tracingService.Trace(productoAntiguo.Id.ToString());
 
                     //Query para obtener información de Configurador de Producto
                     QueryExpression queryConfiguradorEjecutivoAntiguo = new QueryExpression
@@ -59,7 +55,6 @@ namespace GestionPowerApps
                     //Resta de contador a ejecutivo antiguo
                     configuradorEjecutivoAntiguo.Entities[0].Attributes["crbe4_contador"] = int.Parse(configuradorEjecutivoAntiguo.Entities[0].Attributes["crbe4_contador"].ToString()) - 1;
                     orgService.Update(configuradorEjecutivoAntiguo.Entities[0]);
-
                     
                     //Query para obtener información de Configurador de Producto
                     QueryExpression queryConfiguradorEjecutivoNuevo = new QueryExpression
@@ -81,10 +76,16 @@ namespace GestionPowerApps
                     //Asignacion de ejecutivo a prospecto
                     EntityReference ejecutivoNuevo = (EntityReference)configuradorEjecutivoMenor["crbe4_ejecutivo"];
                     prospectoNuevo.Attributes["crbe4_ejecutivo"] = ejecutivoNuevo;
-                    Entity prospectoAux = new Entity();
+                    Entity prospectoAux = new Entity("crbe4_prospecto");
                     prospectoAux.Id = prospectoNuevo.Id;
                     prospectoAux.Attributes["crbe4_ejecutivo"] = ejecutivoNuevo;
                     orgService.Update(prospectoAux);
+
+                    //Registro de oferta de producto a prospecto
+                    Entity productoOfertado = new Entity("crbe4_productoofertado");
+                    productoOfertado.Attributes["crbe4_prospecto"] = new EntityReference("crbe4_prospecto", prospectoNuevo.Id);
+                    productoOfertado.Attributes["crbe4_productoaofrecer"] = new EntityReference("crbe4_productoaofrecer", productoNuevo.Id);
+                    orgService.Create(productoOfertado);
                 }
                 catch (Exception ex)
                 {

@@ -36,7 +36,7 @@ namespace GestionPowerApps
                         EntityName = "crbe4_configuradordeproducto",
                         ColumnSet = new ColumnSet("crbe4_ejecutivo", "crbe4_contador")
                     };
-                
+
                     //Filtro para obtener ejecutivos asignados a producto ingresado en flujo
                     queryConfiguradorEjecutivo.Criteria.AddCondition("crbe4_productoaofrecer", ConditionOperator.Equal, producto.Id);
                     queryConfiguradorEjecutivo.AddOrder("crbe4_contador", OrderType.Ascending);
@@ -54,6 +54,12 @@ namespace GestionPowerApps
                     auxProspecto.Attributes["crbe4_ejecutivo"] = ejecutivo;
                     auxProspecto.Attributes["crbe4_contador"] = 0;
                     orgService.Update(auxProspecto);
+
+                    //Registro de oferta de producto a prospecto
+                    Entity productoOfertado = new Entity("crbe4_productoofertado");
+                    productoOfertado.Attributes["crbe4_prospecto"] = new EntityReference("crbe4_prospecto", prospecto.Id);
+                    productoOfertado.Attributes["crbe4_productoaofrecer"] = new EntityReference("crbe4_productoaofrecer", producto.Id);
+                    orgService.Create(productoOfertado);
                 }
                 catch (Exception ex)
                 {
