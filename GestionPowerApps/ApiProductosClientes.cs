@@ -31,7 +31,7 @@ namespace GestionPowerApps
             QueryExpression queryProductos = new QueryExpression
             {
                 EntityName = "crbe4_productoaofrecer",
-                ColumnSet = new ColumnSet("crbe4_nombre")
+                ColumnSet = new ColumnSet("crbe4_nombre", "crbe4_fechavigencia")
             };
 
             //Obtención de productos
