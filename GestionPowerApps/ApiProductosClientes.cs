@@ -2,6 +2,7 @@
 using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace GestionPowerApps
@@ -29,7 +30,8 @@ namespace GestionPowerApps
             //Query para obtener lista de productos existentes
             QueryExpression queryProductos = new QueryExpression
             {
-                EntityName = "crbe4_productoaofrecer"
+                EntityName = "crbe4_productoaofrecer",
+                ColumnSet = new ColumnSet("crbe4_nombre")
             };
 
             //Obtención de productos
@@ -62,7 +64,6 @@ namespace GestionPowerApps
 
             //Envío de respuesta
             context.OutputParameters["productos"] = productos;
-
         }
     }
 }
