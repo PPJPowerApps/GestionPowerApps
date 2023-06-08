@@ -25,25 +25,29 @@ namespace GestionPowerApps
             ITracingService tracingService =
                 (ITracingService)serviceProvider.GetService(typeof(ITracingService));
 
+            //Obtención y declaración de variables
             Guid prospecto = (Guid)context.InputParameters["crbe4_prospecto"];
             Guid producto = (Guid)context.InputParameters["crbe4_productoaofrecer"];
             bool ofertado = true;
 
+            //Query para obtener productos ofertados
             QueryExpression queryProductosOfertados = new QueryExpression
             {
                 EntityName = "crbe4_productoofertado"
             };
 
+            //Filtros para saber si producto fue ofertado a cliente específico
             queryProductosOfertados.Criteria.AddCondition("crbe4_prospecto", ConditionOperator.Equal, prospecto);
             queryProductosOfertados.Criteria.AddCondition("crbe4_productoaofrecer", ConditionOperator.Equal, producto);
-
             EntityCollection productosOfertados = orgService.RetrieveMultiple(queryProductosOfertados);
 
+            //Lógica para verificar si producto fue ofertado
             if (productosOfertados.Entities.Count.Equals(0))
             {
                 ofertado = false;
             }
 
+            //Envío de respuesta
             context.OutputParameters["respuesta"] = ofertado;
         }
     }
